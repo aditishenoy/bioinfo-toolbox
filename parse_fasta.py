@@ -71,8 +71,6 @@ def read_fasta_sequence(afile, query_id=''):
                 header = query_id
             else:
                 header = aline[1:]
-
-        # otherwise concatenate sequence
         else:
             #aline_seq = aline.translate(None, '.-').upper()
             seq += aline
