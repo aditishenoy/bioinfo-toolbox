@@ -133,9 +133,23 @@ print (type(target_list))
 print (target_list.shape)
 
 
-# Per-protein embedding (4096,)
-if args.type == 'PP':
-    protein_embed = torch.tensor(embedding).sum(dim=0).mean(dim=0)
+features = [] 
+for seq_num in range(len(embedding)):
+    seq_len = (attention_mask[seq_num] == 1).sum()
+    seq_emd = embedding[ seq_num][1:seq_len-1]
+    features.append(seq_emd)
+
+X = np.stack(features, axis = 0)
+print (X.shape)
+
+with h5py.File(outputfile, "w") as embeddings_file:
+    embeddings_file.create_dataset("labels", data=target_list)
+    embeddings_file.create_dataset('features', data=X)
+
+"""
+# Per-protein embedding (N, 4096)
+if args.type == 'PPro':
+    protein_embed = torch.tensor(embedding).sum(dim=1)
     protein_embed = protein_embed.cpu().numpy()
     print (protein_embed.shape)
 
@@ -143,22 +157,5 @@ if args.type == 'PP':
         embeddings_file.create_dataset("labels", data=target_list)
         embeddings_file.create_dataset('features', data=protein_embed)
 
-
-# Per-residue embeddings (L, 4096)
-if args.type == 'PR':
-    residue_embd = torch.tensor(embedding).sum(dim=1)
-    residue_embd = residue_embd.cpu().numpy()
-    print (residue_embd.shape)
-
-    with h5py.File(outputfile, "w") as embeddings_file:
-        embeddings_file.create_dataset("labels", data=target_list)
-        embeddings_file.create_dataset('features', data=residue_embd)
-
-
-
-
-
-
-
-
+"""
 

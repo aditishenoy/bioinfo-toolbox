@@ -30,7 +30,7 @@ vocabFilePath = os.path.join(modelFolderPath, 'vocab.txt')
 
 
 parser = argparse.ArgumentParser(description="Main script to run models")
-parser.add_argument("--type", type=str, help="PP/PR")
+parser.add_argument("--type", type=str, default = None, help="PP/PR")
 parser.add_argument("--fastafilepath", type=str, help="training/testing")
 parser.add_argument("--mappings", type=str, help="training/testing")
 parser.add_argument("--output", type=str, help="training/testing")
@@ -85,7 +85,7 @@ model = BertModel.from_pretrained(modelFolderPath)
 device = torch.device('cpu')
 model = model.eval()
 
-fasta_dirr = args.fastafilepath
+fasta_dirr = args.fastafilepath + '/'
 mappings = args.mappings 
 outputfile = args.output
 
@@ -106,10 +106,10 @@ for filename in os.listdir(fasta_dirr):
         sequence_list.append(sequence)
         target_list.append(str(tar))
 
-print (len(sequence_list))
-print (len(target_list))
+#print (len(sequence_list))
+#print (len(target_list))
 npuniq = np.unique(target_list)
-print (npuniq)
+#print (npuniq)
 
 ids = tokenizer.batch_encode_plus(sequence_list, add_special_tokens=True, pad_to_max_length=True)
 input_ids = torch.tensor(ids['input_ids']).to(device)
@@ -119,30 +119,35 @@ attention_mask = torch.tensor(ids['attention_mask']).to(device)
 with torch.no_grad():
     embedding = model(input_ids=input_ids,attention_mask=attention_mask)[0]
     embedding = embedding.cpu().numpy()
-    print (type(embedding))
     print (embedding.shape)
 
 attention_mask = np.asarray(attention_mask)
 
 target_list = np.char.encode(np.array(target_list), encoding='utf8')
-print (type(target_list))
 print (target_list.shape)
 
-# Per-protein embedding (1024,) 
-if args.type == 'PP':
-    protein_embed = torch.tensor(embedding).sum(dim=0).mean(dim=0)
+features = [] 
+for seq_num in range(len(embedding)):
+    seq_len = (attention_mask[seq_num] == 1).sum()
+    seq_emd = embedding[ seq_num][1:seq_len-1]
+    features.append(seq_emd)
+
+X = np.stack(features, axis = 0)
+print (X.shape)
+
+with h5py.File(outputfile, "w") as embeddings_file:
+    embeddings_file.create_dataset("labels", data=target_list)
+    embeddings_file.create_dataset('features', data=X)
+
+"""
+# Per-protein embedding (N, 1024) 
+if args.type == 'PPro':
+    protein_embed = torch.tensor(embedding).sum(dim=1).mean(dim=1)
     protein_embed = protein_embed.cpu().numpy()
     print (protein_embed.shape)
+
     with h5py.File(outputfile, "w") as embeddings_file:
         embeddings_file.create_dataset("labels", data=target_list)
         embeddings_file.create_dataset('features', data=protein_embed)
 
-# Per-residue embeddings (L, 4096)
-if args.type == 'PR':
-    residue_embd = torch.tensor(embedding).sum(dim=1)
-    residue_embd = residue_embd.cpu().numpy()
-    print (residue_embd.shape)
-    with h5py.File(outputfile, "w") as embeddings_file:
-        embeddings_file.create_dataset("labels", data=target_list)
-        embeddings_file.create_dataset('features', data=residue_embd)
-
+"""
