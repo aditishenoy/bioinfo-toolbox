@@ -1,0 +1,10 @@
+
+Inactive Modules:
+  1) zlib/1.2.11
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) binutils/2.32     2) ncurses/6.1
+
+Matplotlib created a temporary config/cache directory at /home/a/aditi/.config/matplotlib because the default path (/scratch/matplotlib-9t5ou_nt) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+/var/spool/slurmd/job9874999/slurm_script: line 9: 483986 Killed                  python generate_ProtBert.py --fastafilepath ~/pfs/current_projects/SubPred/data/EXP-5-20-05-03/FastaFiles25404/ --mappings /home/a/aditi/pfs/current_projects/SubPred/data/EXP-5.1-20-05-06-embeddings/training_mappings_noCAN --output ~/pfs/phd_BIT/generate_embeddings/BERT_training.h5
+slurmstepd: error: Detected 2 oom-kill event(s) in step 9874999.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
