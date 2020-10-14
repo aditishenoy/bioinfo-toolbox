@@ -79,8 +79,12 @@ if not os.path.exists(configFilePath):
 if not os.path.exists(vocabFilePath):
     download_file(vocabUrl, vocabFilePath)
 
+<<<<<<< HEAD
 tokenizer = BertTokenizer(vocabFilePath, do_lower_case=False, gradient_checkpointing=True)
 self.encoder_features = 1024
+=======
+tokenizer = BertTokenizer(vocabFilePath, do_lower_case=False )
+>>>>>>> 46fca9b4cd460b946d19f7725d3a85da84a2653a
 
 model = BertModel.from_pretrained(modelFolderPath)
 device = torch.device('cpu')
